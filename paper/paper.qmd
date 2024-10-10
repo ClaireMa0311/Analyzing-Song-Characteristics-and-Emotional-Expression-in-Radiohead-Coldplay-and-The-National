@@ -1,0 +1,145 @@
+---
+title: "Analyzing Song Characteristics and Emotional Expression in Radiohead, Coldplay and The National"
+author: "Claire Ma, Bingxu Li, Molly Zhou, Zeyi Cai, Ziheng Wang"
+date: "2024-10-10"
+format: pdf
+editor: visual
+number-sections: true
+bibliography: references.bib
+---
+
+```{r}
+#| include: false
+
+#| warning: false
+
+#| message: false
+
+library(tidyverse)
+
+library(haven)
+
+#| include: false
+
+#| warning: false
+
+#| message: false
+```
+
+## Introduction 
+
+This report explores the relationship between song characteristics and album release dates for three iconic bands: Radiohead, Coldplay, and The National. Using Spotify data, we investigate how key musical features—such as song durations and valence (a measure of emotional positivity)—have shifted over time for these artists. Drawing from Spotify’s API, we collected track data and created visualizations to highlight trends across their discographies. Our goal is to reveal patterns in how these bands’ styles have evolved, both in production and emotional tone, providing deeper insights into their artistic journeys. By analyzing these changes, we examine how Radiohead, Coldplay, and The National have expressed emotion in their music over the years, capturing both sound and sentiment shifts as their careers have progressed.
+
+## Results 
+
+```{r echo=FALSE}
+#loading the libraries
+
+library(spotifyr)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+```
+
+```{r echo=FALSE}
+SPOTIFY_CLIENT_ID = '210ddc701e8c457bb34d8b6fc7da6fb0'
+SPOTIFY_CLIENT_SECRET = '0cba16dd7483435b830a82ec03e06b15'
+
+```
+
+You can add options to executable code like this
+
+```{r echo=FALSE}
+radiohead <- get_artist_audio_features("radiohead")
+saveRDS(radiohead, "radiohead.rds")
+radiohead <- readRDS("radiohead.rds")
+
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r echo=FALSE}
+radiohead <- as_tibble(radiohead)
+
+radiohead |>
+  mutate(album_release_date = ymd(album_release_date)) |>
+  ggplot(aes(
+    x = album_release_date,
+    y = duration_ms,
+    group = album_release_date
+  )) +
+  geom_boxplot() +
+  geom_jitter(alpha = 0.5, width = 0.3, height = 0) +
+  theme_minimal() +
+  labs(
+    x = "Album release date",
+    y = "Duration of song (ms)"
+  )
+```
+
+The first graph shows the duration of the songs in Radiohead‘s album from the early days to the recently released ones. We use a combination of boxplots and scatter plots to explore the distribution of the duration of the songs and find the variability in the duration of songs of different albums.
+
+The length of songs in early albums is generally shorter, while the songs in recent albums tend to be longer with more varied durations. There exists some outliers and missing data points but the overall pattern is still valid.
+
+\
+
+```{r echo=FALSE}
+cold_play <- get_artist_audio_features("4gzpq5DPGxSnKTe4SA8HAU")
+the_national <- get_artist_audio_features("2cCUtGK9sDU2EoElnk0GNB")
+
+saveRDS(cold_play, "cold_play.rds")
+saveRDS(the_national,"the_national.rds")
+```
+
+```{r echo=FALSE}
+rbind(cold_play, the_national, radiohead) |>
+  select(artist_name, album_release_date, valence) |>
+  mutate(album_release_date = ymd(album_release_date)) |> 
+  ggplot(aes( x = album_release_date, y = valence, color = artist_name)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth() +
+  theme_minimal() +
+  facet_wrap(facets = vars(artist_name), dir = "v") +
+  labs(
+    x = "Album release date",
+    y = "Valence",
+    color = "Artist"
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+
+```
+
+```{r}
+rbind(cold_play, the_national, radiohead) |>
+  select(artist_name, album_release_date, valence) |>
+  mutate(album_release_date = ymd(album_release_date)) |> 
+  ggplot(aes( x = album_release_date, y = valence, color = artist_name)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth() +
+  theme_minimal() +
+  facet_wrap(facets = vars(artist_name), dir = "v") +
+  labs(
+    x = "Album release date",
+    y = "Valence",
+    color = "Artist"
+  ) +
+  scale_color_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+```
+
+The second graph focuses on the valence (or emotional positivity) of songs across the three artists: Radiohead, Coldplay, and The National. Valence is plotted against album release dates(from 2000 to 2024) to observe emotional trends in their music.
+
+From the graph, Radiohead demonstrates lower valence scores compared with the other two artists. Coldplay shows a wider range of valence, with both high and low valence values appearing throughout their discography. The National shows variations in more recent releases (after 2000), and it has more neutral tones.Each artist’s valence from 2000 to 2024 is modeled using a smooth line, showing a general trend of the three artists.
+
+\
+
+## Conclusion
+
+This analysis compares how song characteristics, like duration and emotional tone (valence), change across different artists and albums. Radiohead consistently maintains a melancholic tone throughout their music, while Coldplay shows more variety in both song length and emotional tone. Similarly, The National, like Radiohead, tends to produce music with a more neutral or subdued emotional tone, showing little variation in valence. Although some data is missing, the overall trends provide a clear view of how these bands' musical styles have evolved over time. Future studies could address the gaps in the data and explore additional features like tempo and energy to deepen the analysis.
+
+## Reference
+
+\
+
+## 
